@@ -1,0 +1,110 @@
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+
+
+class StartNewGameWindow extends JFrame{
+
+
+
+
+
+    // 18 объявляем параметры окна
+    private static final int WINDOW_HEIGHT = 230; // высота
+    private static final int WINDOW_WIDTH = 350; // ширина
+    private static final int MIN_WINDOW_LENGTH = 3; // минимальная выйграшная длина
+    private static final int MIN_FIELD_SIZE = 3; // минимальный размер поля
+    private static final int MAX_FIELD_SIZE = 10; // максимальный размер поля
+    private GameWindow gameWindow;
+    private JRadioButton HumVsAi = new JRadioButton("Human vs. AI", true); // указываем что это кнопка выбрана при старте
+    private JRadioButton HumVsHum = new JRadioButton("Human vs. Human");
+    private JSlider slideFieldSize;
+    private JSlider slideWinLength;
+    StartNewGameWindow(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        Rectangle gameWindowBounds = gameWindow.getBounds();
+        int posX = (int)gameWindowBounds.getCenterX() - WINDOW_WIDTH / 2;
+        int posY = (int)gameWindowBounds.getCenterY() - WINDOW_HEIGHT / 2;
+        setLocation(posX, posY);
+        setResizable(false);
+        setTitle("Creating new game");
+        setLayout(new GridLayout(10, 1));
+        addGameControlsMode();
+        addGameControlField();
+
+        JButton btnStartGame = new JButton("New Game");
+        btnStartGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnStartGame_OnClick();
+            }
+        });
+        add(btnStartGame);
+
+    }
+    private void addGameControlsMode() {
+        add(new JLabel("Choose gaming mode"));
+        HumVsAi = new JRadioButton("Human VS AI");
+        HumVsHum = new JRadioButton("Human VS Human");
+        ButtonGroup gameMode = new ButtonGroup();
+        gameMode.add(HumVsAi);
+        gameMode.add(HumVsHum);
+        HumVsAi.setSelected(true);
+        add(HumVsAi);
+        add(HumVsHum);
+    }
+
+    private void addGameControlField() {
+        final String WIN_LEN_PREFIX = "Winning length is: ";
+        JLabel lbWinLength = new JLabel(WIN_LEN_PREFIX + MIN_WINDOW_LENGTH);
+
+        slideWinLength = new JSlider(MIN_WINDOW_LENGTH, MAX_FIELD_SIZE, MIN_WINDOW_LENGTH);
+        slideWinLength.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                lbWinLength.setText(WIN_LEN_PREFIX + slideWinLength.getValue());
+            }
+        });
+
+        final String FIELD_SIZE_PREFIX = "Field Size is: ";
+        JLabel lbFieldSize = new JLabel(FIELD_SIZE_PREFIX + MIN_WINDOW_LENGTH);
+
+        slideFieldSize = new JSlider(MIN_FIELD_SIZE, MAX_FIELD_SIZE, MIN_FIELD_SIZE);
+        slideFieldSize.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int currentValue = slideFieldSize.getValue();
+                lbFieldSize.setText(FIELD_SIZE_PREFIX + currentValue);
+                slideWinLength.setMaximum(currentValue);
+            }
+        });
+        add(new JLabel("Choose field size"));
+        add(lbFieldSize);
+        add(slideFieldSize);
+        add(new JLabel("Choose winning length"));
+        add(lbWinLength);
+        add(slideWinLength);
+    }
+
+    private void btnStartGame_OnClick(){
+        int gameMode;
+        if(HumVsAi.isSelected())
+            gameMode = Map.MODE_H_V_A;
+        else if (HumVsHum.isSelected())
+            gameMode = Map.MODE_H_V_H;
+        else
+            throw new RuntimeException("No button selected");
+
+        int sizeFieldX = slideFieldSize.getValue();
+        int winLen = slideWinLength.getValue();
+        gameWindow.startNewGame(gameMode, sizeFieldX, sizeFieldX, winLen);
+        setVisible(false);
+    }
+}
+
+
